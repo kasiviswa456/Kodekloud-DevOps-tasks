@@ -1,0 +1,18 @@
+The Nautilus DevOps team to would like to set up a Puppet agent mode to manage their infrastructure in Stratos DC. For testing they are trying to install and set up Puppet agent package on App Server 1. Please find below more details about the task to proceed further.
+
+Install puppet agent on App Server 1 also start its service.
+
+Solution:
+
+yum -y update
+yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
+
+yum -y install puppet-server
+
+[root @puppet ~]# systemctl start puppetmaster
+[root @puppet ~]# systemctl enable puppetmaster
+
+yum -y install puppet
+
+systemctl start puppet
+[root@client1 ~]# systemctl enable puppet
