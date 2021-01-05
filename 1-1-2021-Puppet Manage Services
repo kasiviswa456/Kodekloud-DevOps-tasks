@@ -8,19 +8,8 @@ Note: Please perform this task using news.pp only, do not create any separate in
 
 Solution:
 
-puppet config set certname stapp01.stratos.xfusioncorp.com --section agent
 
-
-puppet config set server stapp01.stratos.xfusioncorp.com --section agent
-puppet config set server stapp02.stratos.xfusioncorp.com --section agent
-puppet config set server stapp03.stratos.xfusioncorp.com --section agent
-
-
-
-puppet agent -tv
-
-
- class tomcat {
+class tomcat {
    Package { "tomcat":
       ensure => "installed"
    }
@@ -33,3 +22,16 @@ node default {}
 node "stapp01.stratos.xfusioncorp.com", "stapp02.stratos.xfusioncorp.com", "stapp03.stratos.xfusioncorp.com" {
 include tomcat
 }
+
+Create this file on news.pp file in /etc/puppetlabs/code/environments/production/manifests directory
+
+
+
+Run this command in all the app server --   puppet agent -tv
+
+next run below command on Jump server:
+
+puppet apply news.pp 
+
+
+ 
