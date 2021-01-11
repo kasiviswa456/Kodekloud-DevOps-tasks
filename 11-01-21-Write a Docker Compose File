@@ -22,6 +22,6 @@ services:
     ports:
       - '8088:80'
     volumes:
-      - /usr/local/apache2/htdocs
+      - '/usr/local/apache2/htdocs:/opt/security'
       
-  Docker-compose up -d
+  docker-compose up -d
