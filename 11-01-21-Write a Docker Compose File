@@ -20,8 +20,8 @@ services:
     image: 'httpd:latest'
     container_name: httpd
     ports:
-      - '8088:80'
+      - '6400:80'
     volumes:
-      - '/usr/local/apache2/htdocs:/opt/security'
+      -  /opt/finance:/usr/local/apache2/htdocs
       
   docker-compose up -d
