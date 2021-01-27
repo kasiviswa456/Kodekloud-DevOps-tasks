@@ -1,0 +1,118 @@
+The Nautilus Application team is planning to deploy one of the php-based application on Kubernetes cluster. As per discussion with DevOps team they decided to use nginx and phpfpm. Additionally, they shared some custom configuration requirements. Below you can find more details. Please complete the task as per requirements mentioned below:
+
+1.) Create a config map nginx-config for nginx.conf as we want to add some custom settings for nginx.conf.
+
+a) Change default port 80 to 8093 in nginx.conf.
+
+b) Change default document root /usr/share/nginx to /var/www/html in nginx.conf.
+
+c) Update directory index to index index.html index.htm index.php in nginx.conf.
+
+2.) Create a pod named nginx-phpfpm .
+
+b) Create a shared files volume shared-files that will be used by both containers (nginx and phpfpm) also it should be emptyDir: {}
+
+c) Map the ConfigMap we declared above as a volume for the pod. Name the volume as nginx-config-volume
+
+d) Nginx container should be named as nginx-container and it should use nginx:latest image. PhpFPM container should be named as php-fpm-container and it should use php:7.1-fpm image.
+
+e) The shared volume shared-files should be mounted at /var/www/html location in both containers.
+
+f) Add one more volume for nginx-container. Name it as nginx-config-volume, mount path should be /etc/nginx/nginx.conf and subPath should be nginx.conf
+
+Before clicking on finish button always make sure to check if all pods are in running state.
+
+You can use any labels as per your choice.
+
+Note: The kubectl utility on jump_host has been configured to work with the kubernetes cluster.
+
+
+Solution:
+
+configmap.yaml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes  3;
+    error_log  /var/log/nginx/error.log;
+    events {
+      worker_connections  10240;
+    }
+    http {
+      log_format  main
+              'remote_addr:$remote_addr\t'
+              'time_local:$time_local\t'
+              'method:$request_method\t'
+              'uri:$request_uri\t'
+              'host:$host\t'
+              'status:$status\t'
+              'bytes_sent:$body_bytes_sent\t'
+              'referer:$http_referer\t'
+              'useragent:$http_user_agent\t'
+              'forwardedfor:$http_x_forwarded_for\t'
+              'request_time:$request_time';
+      access_log        /var/log/nginx/access.log main;
+      server {
+          listen       8093;
+          server_name  _;
+          location / {
+              root   /var/www/html;
+              index  index.html index.htm;
+          }
+      }
+    }
+
+
+
+
+Pod.yaml
+
+kind: Pod
+apiVersion: v1
+metadata:
+ name: nginx-phpfpm
+spec:
+ volumes:
+ - name: shared-files
+   emptyDir: {}
+ - name: nginx-config-volume
+   configMap:
+    name: nginx-config
+ containers:
+ - image: php:7.1-fpm
+   name: php-fpm-container
+   volumeMounts:
+   - name: shared-files
+     mountPath: /var/www/html
+ - image: nginx:latest
+   name: nginx-container
+   volumeMounts:
+   - name: shared-files
+     mountPath: /var/www/html
+   - name: nginx-config-volume
+     mountPath: /etc/nginx/nginx.conf
+     subPath: nginx.conf
+ 
+ Check the task:
+ 
+ 
+ kubectl exec -it podname /bin/bash  -- It will redirect to the /var/www/html Path
+
+echo "<?phpinfo();?>" > index.php   -- get the php info and store that in the file
+
+from the jump host
+
+get the ip of the pod
+
+10.244.1.4:8093(Container Port)
+
+It will return nginx version or file  
+
+
+Task is closed
+
