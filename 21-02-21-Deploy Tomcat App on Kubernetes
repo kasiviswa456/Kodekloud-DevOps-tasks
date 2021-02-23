@@ -27,7 +27,7 @@ metadata:
   namespace: tomcat-namespace-datacenter
 spec:
   selector:
-    name: tomcat-deployment-datacenter
+    app: tomcat-deployment-datacenter
   type: NodePort
   ports:
   - port: 80
