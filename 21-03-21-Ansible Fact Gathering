@@ -12,3 +12,39 @@ Note: Do not create a separate role for this task, just add all changes in index
 
 Solution:
 
+
+---
+- name: using blockinline module to setup httpd service
+  hosts: stapp01, stapp02, stapp03
+  become: yes
+  gather_facts: True
+  tasks:
+  - name: insert/update "Match User" 
+    blockinfile:
+      create: yes
+      path: /root/facts.txt
+      block: |
+        Ansible managed node IP is {{ ansible_default_ipv4.address }}
+  - name: Install the latest version of Apache
+    yum:
+      name: httpd
+      state: present
+  - name: running httpd
+    service:
+      name: httpd
+      state: started
+  - name: create document root
+    file:
+      path: /var/www/html/index.html
+      state: touch
+  - name: copying the file
+    shell: cp /root/facts.txt /var/www/html/index.html
+  - name: ensure httpd running
+    service:
+      name: httpd
+      state: restarted
+      
+      
+      
+      ---
+      Task closed
