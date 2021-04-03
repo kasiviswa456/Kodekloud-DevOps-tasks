@@ -54,12 +54,54 @@ Note: The kubectl utility on jump_host has been configured to work with the kube
 
 Solution:
 
-cat deployment-redis.yaml
+cat deploy-redis-master.yaml
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis-master
+  labels:
+    app: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis  # has to match .spec.template.metadata.
+  replicas: 1 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: redis # has to match .spec.selector.matchLabels
+    spec:
+      containers:
+      - name: master-redis-nautilus
+        image: redis
+        resources:
+          requests:
+             memory: "100Mi"
+             cpu: "100m"
+        ports:
+        - containerPort: 6379
+  
+  cat svc.yaml
+  
+  apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+
+cat deployment-redis-slave.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-slave
   labels:
     app: redis
 spec:
