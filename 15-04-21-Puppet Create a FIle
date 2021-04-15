@@ -12,3 +12,24 @@ Note: Please perform this task using media.pp only, do not create any separate i
 
 Solution:
 
+class mymodule {
+file { '/opt/data':
+        ensure => directory,
+        owner => 'root',
+        group => 'root',
+    }
+file { "/opt/data/blog.txt":
+        mode => "0644",
+        owner => 'root',
+        group => 'root',
+        source => 'puppet:///modules/filetest/blog.txt',
+    }
+}
+
+
+
+
+node default {}
+node "stapp02.stratos.xfusioncorp.com" {
+include mymodule
+}
