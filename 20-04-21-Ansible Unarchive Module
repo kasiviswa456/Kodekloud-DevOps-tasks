@@ -36,9 +36,6 @@ Playbook.yaml
       unarchive:
         src: /usr/src/finance/nautilus.zip
         dest: /opt/finance/
-        extra_opts:
-        - --transform
-        - s/^xxx/yyy/
     - name: change folder owner and perm
       file:
         path: /opt/finance/unarchive
