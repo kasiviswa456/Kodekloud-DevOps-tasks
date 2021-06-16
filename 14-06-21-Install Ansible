@@ -1,9 +1,44 @@
 During their weekly meeting, the Nautilus DevOps team developed automation and configuration management solutions that they want to implement. While considering several options, the team has decided to go with Ansible for now due to its simple setup and minimal pre-requisites. The team wanted to start testing with Ansible, so they have decided to use jump host as an Ansible controller to test different kinds of tasks on the rest of the servers.
 
 
-Install ansible version 2.7.9 on Jump host.
+Install ansible version 2.9.5 on Jump host.
 
 
 Solutions :
+
+
+
+if you try to install ansible with "yum" ,  you'll have only ansible (2.6,  2.7, 2.8 and 2.9 release available): 
+(and not 2.5.7 release)
+-------------------------------------------------------------------------------------------------------------
+
+We will install ansible 2.9.5 with an another method:
+-----------------------------------------------------
+
+An ansible  repository  with all release of  ansible for Redhat/CentOS/Fedora:
+-----------------------------------------------------------------------------
+  (i.e  https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/)
+  
+  
+install  wget:
+==============
+yum install  wget
+
+download ansible 2.9.5 release:
+===============================
+
+wget   wget https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/ansible-2.9.5-1.el7.ans.noarch.rpm
+
+install  ansible 2.9.5 :
+=======================
+yum  localinstall ansible-2.9.5-1.el7.ans.noarch.rpm
+
+check ansible's  version:
+========================
+ansible  --version
+
+ansible 2.9.5
+
+Good Luck !
 
 
