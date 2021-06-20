@@ -1,0 +1,33 @@
+The Nautilus DevOps team has zipped data on all app servers in Stratos DC that they want to extract to all app servers in the same data center. However, they want to extract that data in a different directory in the app servers. Perform the task using a Puppet programming file as per requirements mentioned below:
+
+
+Create a puppet programming file official.pp under /etc/puppetlabs/code/environments/production/manifests on master node i.e on Jump Server. Using Puppet, archive resource and perform the tasks below:
+
+There is a zip archive /usr/src/official/official.zip on all app servers. Unzip the archive to location /opt/official on each app server.
+
+Note: Please perform this task using official.pp only, do not create any separate inventory file.
+
+
+Soluction:
+
+class archive_extractor {
+    # Copy media.zip to /tmp directory to extract and then cleanup afterwards
+    archive { '/tmp/official.zip':
+        source        => '/usr/src/official/official.zip',
+        extract       => true,
+        extract_path  => '/opt/official',
+        cleanup       => true,
+    }   
+}
+
+node 'stapp01.stratos.xfusioncorp.com', 'stapp02.stratos.xfusioncorp.com', 'stapp03.stratos.xfusioncorp.com' {
+  include archive_extractor
+}
+
+
+
+Verify: Finally, SSH to each hosts and run `sudo puppet agent -tv` 
+#         Run `ls /opt/official` to check extracted contents exists
+
+
+Completed.
