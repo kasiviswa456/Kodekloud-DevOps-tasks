@@ -1,0 +1,36 @@
+The Nautilus DevOps team has put data on all app servers in Stratos DC. jump host is configured as Puppet master server, and all app servers are already been configured as Puppet agent nodes. The team needs to update content of some of the exiting files as well as update its permissions, etc. Please find below more details about the task:
+
+Create a Puppet programming file news.pp under /etc/puppetlabs/code/environments/production/manifests directory on master node i.e Jump Server. Using puppet file resource, perform the below mentioned tasks.
+
+File official.txt already exists under /opt/sysops directory on App Server 1.
+
+Add content Welcome to xFusionCorp Industries! in file official.txt on App Server 1.
+
+Set permissions 0644 for file official.txt on App Server 1.
+
+Note: Please perform this task using news.pp only, do not create any separate inventory file.
+
+
+Solution:
+
+
+
+node 'stapp01.stratos.xfusioncorp.com' {
+include file
+}
+
+class file {
+
+file { '/opt/sysops/official.txt':
+ensure => 'present',
+replace => 'yes', # this is the important property
+content => "Welcome to xFusionCorp Industries!",
+mode => '0644',
+}
+
+}
+
+run puppet agent -tv on node machine
+
+
+---Completed.-----
