@@ -1,0 +1,360 @@
+During last weekly meeting, the Nautilus DevOps team has decided to use Puppet autosign config to auto sign the certificates for all Puppet agent nodes that they will keep adding under the Puppet master in Stratos DC. The Puppet master and CA servers are currently running on jump host and all three app servers are configured as Puppet agents. To set up autosign configuration on the Puppet master server, some configuration settings must be done. Please find below more details:
+
+
+The Puppet server package is already installed on puppet master i.e jump server and the Puppet agent package is already installed on all App Servers. However, you may need to start the required services on all of these servers.
+
+Configure autosign configuration on the Puppet master i.e jump server (by creating an autosign.conf in the puppet configuration directory) and assign the certificates for master node as well as for the all agent nodes. Use the respective host's FDQN to assign the certificates.
+
+Use alias puppet (dns_alt_names) for master node and add its entry in /etc/hosts config file on master i.e Jump Server as well as on the all agent nodes i.e App Servers.
+
+Notes: :- Please make sure to run the puppet agent test using sudo on agent nodes, otherwise you can face certificate issues. In that case you will have to clean the certificates first and then you will be able to run the puppet agent test.
+
+:- Before clicking on the Check button please make sure to verify puppet server and puppet agent services are up and running on the respective servers, also please make sure to run puppet agent test to apply/test the changes manually first.
+
+:- Please note that once lab is loaded, the puppet server service should start automatically on puppet master server, however it can take upto 2-3 minutes to start.
+
+
+
+
+Solution:
+
+
+ 1.  Switch root user to avoid password renter 
+
+
+thor@jump_host ~$ sudo su -
+
+ We trust you have received the usual lecture from the local System
+
+Administrator. It usually boils down to these three things:
+
+     #1) Respect the privacy of others.
+
+    #2) Think before you type.
+
+    #3) With great power comes great responsibility.
+
+ [sudo] password for thor:
+
+root@jump_host ~#
+
+2. As per the Hint check Hosts file on jumpserver and add the alias    
+
+root@jump_host /# cat /etc/hosts
+
+127.0.0.1       localhost
+
+::1     localhost ip6-localhost ip6-loopback
+
+fe00::0 ip6-localnet
+
+ff00::0 ip6-mcastprefix
+
+ff02::1 ip6-allnodes
+
+ff02::2 ip6-allrouters
+
+172.16.238.10   stapp01.stratos.xfusioncorp.com
+
+172.16.238.11   stapp02.stratos.xfusioncorp.com
+
+172.16.238.12   stapp03.stratos.xfusioncorp.com
+
+172.16.238.3    jump_host.stratos.xfusioncorp.com jump_host
+
+172.16.239.4    jump_host.stratos.xfusioncorp.com jump_host
+
+root@jump_host /#
+
+root@jump_host /# ping puppet
+
+PING puppet.stratos.xfusioncorp.com (212.32.237.90) 56(84) bytes of data.
+
+^C
+
+--- puppet.stratos.xfusioncorp.com ping statistics ---
+
+8 packets transmitted, 0 received, 100% packet loss, time 7168ms
+
+ root@jump_host /#
+
+root@jump_host /# vi /etc/hosts
+
+root@jump_host /# cat /etc/hosts
+
+127.0.0.1       localhost
+
+::1     localhost ip6-localhost ip6-loopback
+
+fe00::0 ip6-localnet
+
+ff00::0 ip6-mcastprefix
+
+ff02::1 ip6-allnodes
+
+ff02::2 ip6-allrouters
+
+172.16.238.10   stapp01.stratos.xfusioncorp.com
+
+172.16.238.11   stapp02.stratos.xfusioncorp.com
+
+172.16.238.12   stapp03.stratos.xfusioncorp.com
+
+172.16.238.3    jump_host.stratos.xfusioncorp.com jump_host puppet
+
+172.16.239.4    jump_host.stratos.xfusioncorp.com jump_host 
+
+root@jump_host /#
+
+root@jump_host /# ping puppet
+
+PING jump_host.stratos.xfusioncorp.com (172.16.238.3) 56(84) bytes of data.
+
+64 bytes from jump_host.stratos.xfusioncorp.com (172.16.238.3): icmp_seq=1 ttl=64 time=0.047 ms
+
+64 bytes from jump_host.stratos.xfusioncorp.com (172.16.238.3): icmp_seq=2 ttl=64 time=0.057 ms
+
+--- jump_host.stratos.xfusioncorp.com ping statistics ---
+
+2 packets transmitted, 2 received, 0% packet loss, time 1025ms
+
+rtt min/avg/max/mdev = 0.047/0.052/0.057/0.005 ms
+
+root@jump_host /#
+
+
+ 3.  Create autosign config file  &  define all App server FQDN 
+
+root@jump_host /# vi /etc/puppetlabs/puppet/autosign.conf
+
+root@jump_host /# cat /etc/puppetlabs/puppet/autosign.conf
+
+jump_host.stratos.xfusioncorp.com
+
+stapp01.stratos.xfusioncorp.com
+
+stapp02.stratos.xfusioncorp.com
+
+stapp03.stratos.xfusioncorp.com
+
+root@jump_host /#
+
+
+4.  Post file saved restart the puppetserver daemon
+    
+root@jump_host /# systemctl restart puppetserver
+
+root@jump_host /# systemctl status puppetserver
+
+● puppetserver.service - puppetserver Service
+
+   Loaded: loaded (/usr/lib/systemd/system/puppetserver.service; disabled; vendor preset: disabled)
+
+   Active: active (running) since Tue 2021-06-22 10:31:56 UTC; 2s ago
+
+  Process: 221 ExecStop=/opt/puppetlabs/server/apps/puppetserver/bin/puppetserver stop (code=exited, status=0/SUCCESS)
+
+  Process: 283 ExecStart=/opt/puppetlabs/server/apps/puppetserver/bin/puppetserver start (code=exited, status=0/SUCCESS)
+
+ Main PID: 290 (java)
+
+    Tasks: 42 (limit: 4915)
+
+   CGroup: /docker/b19ec1c9479958a950648b468b289f271d3872370764a5089e92246a80b1d5d0/system.slice/puppetserver.service
+
+           └─290 /usr/bin/java -Xms512m -Xmx512m -Djruby.logger.class=com.puppetlabs.jru...
+
+ 
+
+Jun 22 10:31:41 jump_host.stratos.xfusioncorp.com systemd[1]: Starting puppetserver Serv...
+
+Jun 22 10:31:56 jump_host.stratos.xfusioncorp.com systemd[1]: Started puppetserver Service.
+
+Hint: Some lines were ellipsized, use -l to show in full.
+
+root@jump_host /#
+
+
+5. Check any certificate exist on puppet server
+
+root@jump_host /# puppetserver ca list --all
+
+No certificates to list
+
+root@jump_host /#
+
+
+6. Now login on all app server stapp01, stapp02 & stapp03 ( refer below video )
+     Switch to  root user 
+
+
+root@jump_host /# ssh tony@stapp01
+
+The authenticity of host 'stapp01 (172.16.238.10)' can't be established.
+
+ECDSA key fingerprint is SHA256:QLfY6C8NkImUxr5ki4EqINDyXebylMoeVK2vr23nt4U.
+
+ECDSA key fingerprint is MD5:5c:20:c4:aa:62:f4:72:72:5b:5d:a9:8f:07:8f:79:1b.
+
+Are you sure you want to continue connecting (yes/no)? yes
+
+Warning: Permanently added 'stapp01,172.16.238.10' (ECDSA) to the list of known hosts.
+
+tony@stapp01's password:
+
+[tony@stapp01 ~]$ sudo su -
+
+ We trust you have received the usual lecture from the local System
+
+Administrator. It usually boils down to these three things:
+
+     #1) Respect the privacy of others.
+
+    #2) Think before you type.
+
+    #3) With great power comes great responsibility.
+
+ [sudo] password for tony:
+
+[root@stapp01 ~]#
+
+7.  Edit Hosts file and add the puppet server ( Jumpserver )  & on App Server   
+
+[root@stapp01 ~]# vi /etc/hosts
+
+[root@stapp01 ~]# cat /etc/host
+
+cat: /etc/host: No such file or directory
+
+[root@stapp01 ~]# cat /etc/hosts
+
+127.0.0.1       localhost
+
+::1     localhost ip6-localhost ip6-loopback
+
+fe00::0 ip6-localnet
+
+ff00::0 ip6-mcastprefix
+
+ff02::1 ip6-allnodes
+
+ff02::2 ip6-allrouters
+
+172.16.238.10   stapp01.stratos.xfusioncorp.com stapp01
+
+172.16.239.3    stapp01.stratos.xfusioncorp.com stapp01
+
+172.16.238.3    jump_host.stratos.xfusioncorp.com jump_host puppet
+
+172.16.239.4    jump_host.stratos.xfusioncorp.com jump_host 
+
+[root@stapp01 ~]#
+
+[root@stapp01 ~]# ping puppet
+
+PING jump_host.stratos.xfusioncorp.com (172.16.238.3) 56(84) bytes of data.
+
+64 bytes from jump_host.stratos.xfusioncorp.com (172.16.238.3): icmp_seq=1 ttl=64 time=0.070 ms
+
+64 bytes from jump_host.stratos.xfusioncorp.com (172.16.238.3): icmp_seq=2 ttl=64 time=0.089 ms
+
+--- jump_host.stratos.xfusioncorp.com ping statistics ---
+
+2 packets transmitted, 2 received, 0% packet loss, time 1013ms
+
+rtt min/avg/max/mdev = 0.070/0.079/0.089/0.013 ms
+
+[root@stapp01 ~]#
+
+
+8.  Restart the  puppet service on App server      
+  
+[root@stapp01 ~]# systemctl restart puppet
+
+[root@stapp01 ~]# systemctl status puppet
+
+● puppet.service - Puppet agent
+
+   Loaded: loaded (/usr/lib/systemd/system/puppet.service; disabled; vendor preset: disabled)
+
+   Active: active (running) since Tue 2021-06-22 10:37:31 UTC; 10s ago
+
+ Main PID: 165 (puppet)
+
+   CGroup: /docker/7c0a2eb59802532674f1ec6a32dc7cb41eabdd6bfdae2349fc9c15246c42feee/system.slice/puppet.service
+
+           └─165 /opt/puppetlabs/puppet/bin/ruby /opt/puppetlabs/puppet/bin/puppet agent --no-daemonize
+
+ 
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[1]: Converting job puppet.service/restart -> puppet.service/start
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[1]: puppet.service: cgroup is empty
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[1]: About to execute: /opt/puppetlabs/puppet/bin/puppet agent $PUPPET_EXTRA_OPTS --no...monize
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[1]: Forked /opt/puppetlabs/puppet/bin/puppet as 165
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[1]: puppet.service changed dead -> running
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[1]: Job puppet.service/start finished, result=done
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[1]: Started Puppet agent.
+
+Jun 22 10:37:31 stapp01.stratos.xfusioncorp.com systemd[165]: Executing: /opt/puppetlabs/puppet/bin/puppet agent --no-daemonize
+
+Jun 22 10:37:34 stapp01.stratos.xfusioncorp.com puppet-agent[165]: Starting Puppet client version 6.15.0
+
+Jun 22 10:37:36 stapp01.stratos.xfusioncorp.com puppet-agent[179]: Applied catalog in 0.02 seconds
+
+Hint: Some lines were ellipsized, use -l to show in full.
+
+[root@stapp01 ~]#
+
+
+9.  Validate by running the puppet agent 
+
+[root@stapp01 ~]# puppet agent -tv
+
+Info: Using configured environment 'production'
+
+Info: Retrieving pluginfacts
+
+Info: Retrieving plugin
+
+Info: Retrieving locales
+
+Info: Caching catalog for stapp01.stratos.xfusioncorp.com
+
+Info: Applying configuration version '1634803060'
+
+Notice: Applied catalog in 0.08 seconds
+
+[root@stapp01 ~]#
+
+
+10.  List the certificate auto signed on puppet server (jumpserver)
+     
+root@jump_host /# puppetserver ca list --all
+
+Signed Certificates:
+
+    stapp02.stratos.xfusioncorp.com         (SHA256)  96:87:D7:3D:5E:4B:61:C1:0D:4E:BA:A0:69:87:D1:A0:F5:B8:F7:00:D3:3E:1A:98:47:62:8B:E8:9E:15:64:BB
+
+    jump_host.stratos.xfusioncorp.com       (SHA256)  9A:9E:58:1F:E5:36:37:CF:D5:00:F4:58:CF:B7:E3:92:E5:83:A8:C2:F9:D1:B6:4A:91:96:9E:37:C4:56:E6:7C      alt names: ["DNS:puppet", "DNS:jump_host.stratos.xfusioncorp.com"] authorization extensions: [pp_cli_auth: true]
+
+    stapp03.stratos.xfusioncorp.com         (SHA256)  0E:81:07:91:21:34:AA:12:4C:92:32:19:A2:EC:67:F5:41:C7:BA:E6:2C:E6:AC:00:CC:7E:22:38:2E:C8:83:33
+
+    stapp01.stratos.xfusioncorp.com         (SHA256)  AC:C6:DE:88:D5:F0:55:B5:32:62:9F:F5:AC:71:0F:8D:8E:50:99:88:C2:AD:B3:81:0A:C5:E2:12:B1:FD:8F:10
+
+root@jump_host /#
+
+
+
+Please Note this steps shown for stapp01 server.
+Follow above steps 6 - 9 on stapp02 & stapp03 server 
+
+11.  Click on Finish & Confirm to complete the task successful
+
+
+--Completed---
