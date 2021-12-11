@@ -12,24 +12,21 @@ Note: Please perform this task using media.pp only, do not create any separate i
 
 Solution:
 
-class mymodule {
-file { '/opt/data':
-        ensure => directory,
-        owner => 'root',
-        group => 'root',
-    }
-file { "/opt/data/blog.txt":
-        mode => "0644",
-        owner => 'root',
-        group => 'root',
-        source => 'puppet:///modules/filetest/blog.txt',
-    }
+
+class file_creator {
+
+  # Now create media.txt under /opt/sysops
+
+  file { '/opt/dba/beta.txt':
+
+    ensure => 'present',
+
+  }
+
 }
 
+ node 'stapp01.stratos.xfusioncorp.com' {
 
+  include file_creator
 
-
-node default {}
-node "stapp02.stratos.xfusioncorp.com" {
-include mymodule
 }
