@@ -30,3 +30,20 @@ class file_creator {
   include file_creator
 
 }
+
+
+Login to app 1 Run below command:L
+
+
+[root@stapp01 ~]# puppet agent -tv
+Info: Using configured environment 'production'
+Info: Retrieving pluginfacts
+Info: Retrieving plugin
+Info: Retrieving locales
+Info: Caching catalog for stapp01.stratos.xfusioncorp.com
+Info: Applying configuration version '1639228211'
+Notice: /Stage[main]/File_creator/File[/opt/dba/beta.txt]/ensure: created
+Notice: Applied catalog in 0.11 seconds
+[root@stapp01 ~]# ll /opt/dba/
+total 0
+-rw-r--r-- 1 root root 0 Dec 11 13:10 beta.txt
