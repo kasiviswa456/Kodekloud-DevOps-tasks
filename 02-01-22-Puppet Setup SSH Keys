@@ -1,0 +1,76 @@
+Create a Puppet programming file media.pp under /etc/puppetlabs/code/environments/production/manifests directory on the Puppet master node i.e on Jump Server. Define a class ssh_node1 for agent node 1 i.e App Server 1, ssh_node2 for agent node 2 i.e App Server 2, ssh_node3 for agent node3 i.e App Server 3. You will need to generate a new ssh key for thor user on Jump Server, that needs to be added on all App Servers.
+
+Configure a password less SSH connection from puppet master i.e jump host to all App Servers. However, please make sure the key is added to the authorized_keys file of each app's sudo user (i.e tony for App Server 1).
+
+Notes: :- Before clicking on the Check button please make sure to verify puppet server and puppet agent services are up and running on the respective servers, also please make sure to run puppet agent test to apply/test the changes manually first.
+
+:- Please note that once lab is loaded, the puppet server service should start automatically on puppet master server, however it can take upto 2-3 minutes to start.
+
+
+
+Solution:
+
+
+ssh-keygen need to run on Jumpserver
+
+$public_key =  'AAAAB3NzaC1yc2EAAAADAQABAAABAQCjzucWviIHiT0R1YP3cYmkWcNfv53svphAIW4RpnDiSdoTvooeah3Akh/VagwCJsClpdwuM3xdAvEWyHFkI6zdItrdjqM8fJ6Y8HYXF8Ros979TVYcktI8Ird+92CFqsAVRqGTyJNx++68N7JA78dWf+SEsGaDSkEjGkjfIJgOlZ1OmJJB/pszUOjeiFvEJbkc+TA0fH6htGg/QCotC1tAUnIszf664QENjNiqIfruM/CwojExmos8RKKO1GYgjBFzB9eofk7zsjn1zk9NJ7LGqvZ6/EirTf2dCOH5RMYbjccGZI/AQTXQ15kUYUHCtpUQFrQ88T0W93D9bbiXHdFn'
+
+class ssh_node1 {
+  ssh_authorized_key { 'tony@stapp01':
+    ensure => present,
+    user   => 'tony',
+    type   => 'ssh-rsa',
+    key    => $public_key,
+  }
+}
+
+class ssh_node2 {
+  ssh_authorized_key { 'steve@stapp02':
+    ensure => present,
+    user   => 'steve',
+    type   => 'ssh-rsa',
+    key    => $public_key,
+  }
+}
+
+class ssh_node3 {
+  ssh_authorized_key { 'banner@stapp03':
+    ensure => present,
+    user   => 'banner',
+    type   => 'ssh-rsa',
+    key    => $public_key,
+  }
+}
+
+node stapp01.stratos.xfusioncorp.com {
+  include ssh_node1
+}
+
+node stapp02.stratos.xfusioncorp.com {
+  include ssh_node2
+}
+
+node stapp03.stratos.xfusioncorp.com {
+  include ssh_node3
+}
+
+
+
+
+
+First validate your file for syntax errors by running puppet parser validate <filename> on the same directory e.g. puppet parser validate news.pp
+Next, dry-run the code in the specified hosts by running sudo puppet agent -tv --noop (You need to first SSH to that host)
+Finally, run the actual code by running sudo puppet agent -tv
+Always verify the successful completion of tasks using the following steps:
+Run the actual code, login to the target hosts and verify whether the required changes are complete
+Common mistakes
+Not specifying which nodes to run by specifying a node definition
+node 'stapp01.stratos.xfusioncorp.com', 'stapp02.stratos.xfusioncorp.com', 'stapp03.stratos.xfusioncorp.com' {
+  include nginx_installer
+}
+Not running sudo puppet agent -tv in the agent hosts when the task requires you to do so. Some of the tasks require you to not just create the puppet programming file, but also run the configurations in all the host. Pay attention to that.
+
+
+
+
+--Completed0---
