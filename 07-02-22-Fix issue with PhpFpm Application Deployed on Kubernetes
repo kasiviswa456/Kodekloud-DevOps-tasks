@@ -10,3 +10,28 @@ Note: The kubectl utility on jump_host has been configured to work with the kube
 
 Solution:
 
+
+
+
+kubectl cp /tmp/index.php nginx-phpfpm-dp-5cccd45499-8bvcm:/var/www/html -c nginx-container
+
+
+kubectl exec -it nginx-phpfpm-dp-5cccd45499-8bvcm -c nginx-container -- bash
+
+kubectl edit configmap. 
+
+
+We need to add index.php in the configmap
+
+Kubectl edit  svc (ADD the port in service file)
+
+
+
+Note: make sure you edit the configmap and add index.php and recreate the pod. try again all the best{ after this please run cp commad again}
+
+
+
+--Closed---
+
+
+
