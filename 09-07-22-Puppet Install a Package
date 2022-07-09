@@ -1,0 +1,49 @@
+Some new packages need to be installed on app server 1 in Stratos Datacenter. The Nautilus DevOps team has decided to install the same using Puppet. Since jump host is already configured to run as Puppet master server and all app servers are already configured to work as the puppet agent nodes, we need to create required manifests on the Puppet master server so that the same can be applied on all Puppet agent nodes. Please find more details about the task below.
+
+Create a Puppet programming file beta.pp under /etc/puppetlabs/code/environments/production/manifests directory on master node i.e Jump Server and using puppet package resource perform the tasks given below.
+
+Install package nginx through Puppet package resource only on App server 1i.epuppet agent node 1`.
+Notes: :- Please make sure to run the puppet agent test using sudo on agent nodes, otherwise you can face certificate issues. In that case you will have to clean the certificates first and then you will be able to run the puppet agent test.
+
+:- Before clicking on the Check button please make sure to verify puppet server and puppet agent services are up and running on the respective servers, also please make sure to run puppet agent test to apply/test the changes manually first.
+
+:- Please note that once lab is loaded, the puppet server service should start automatically on puppet master server, however it can take upto 2-3 minutes to start.
+
+
+
+Solution:
+
+
+
+class nginx_installer {
+    package {'nginx':
+        ensure => installed
+    }
+}
+
+node 'stapp01.stratos.xfusioncorp.com' {
+  include nginx_installer
+}
+
+
+puppet agent -tv. 
+-- Need to run Node level 
+
+OUTPUT
+
+[root@stapp01 ~]# puppet agent -tv
+Info: Using configured environment 'production'
+Info: Retrieving pluginfacts
+Info: Retrieving plugin
+Info: Retrieving locales
+Info: Caching catalog for stapp01.stratos.xfusioncorp.com
+Info: Applying configuration version '1657349486'
+Notice: /Stage[main]/Nginx_installer/Package[nginx]/ensure: created
+Notice: Applied catalog in 24.97 seconds
+[root@stapp01 ~]# 
+[root@stapp01 ~]# 
+[root@stapp01 ~]#  rpm -qa |grep nginx
+nginx-1.20.1-9.el7.x86_64
+nginx-filesystem-1.20.1-9.el7.noarch
+
+
